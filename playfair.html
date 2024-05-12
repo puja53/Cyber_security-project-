@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" type="text/css" href="../css/main.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
+  <title>PLAYFAIR CIPHER</title>
+</head>
+<body>
+  
+  <!-- CIPHER NAME -->
+  <div class="title">
+    <h1 class="outsideScreen">PLAYFAIR CIPHER</h1>
+  </div>
+  <button class="information" id="information">INFORMATION</button><br><br><br>
+  <button class="instructions" id="instructions">INSTRUCTIONS</button>
+  <div id="myinformation" class="information_content">
+
+    <!-- content -->
+    <div class="information-content">
+      <div><span class="close1">&times;</span></div>
+      <div class="information-body">
+        <p>1. The Playfair cipher was the first practical digraph substitution cipher.
+          <br><br>2. This was invented in 1854 by Charles Wheatstone, but was named after Lord Playfair who promoted the use of the cipher.
+          <br><br>3. It was used for tactical purposes by British forces in the Second Boer War and in World War I and for the same purpose by the Australians during World War II. This was because Playfair is reasonably fast to use and requires no special equipment.
+          <br><br>4. The technique encrypts pairs of letters (digraphs), instead of single letters as in the simple substitution cipher. 
+          <br><br>5. The Playfair is significantly harder to break since the frequency analysis used for simple substitution ciphers does not work with it.
+          <br><br>6. Any sequence of 25 letters can be used as a key.
+           </p>
+        
+      </div>
+    </div>
+  
+  </div>
+  <div id="myinstructions" class="instructions_content">
+
+    <!-- content -->
+    <div class="instructions-content">
+      <div class="instructions-header">
+        <span class="close2">&times;</span>
+      </div>
+      <div class="instructions-body">
+        <p>
+          <br>1. Enter the text to encrypt
+          <br><br>2. Enter a sequence of 25 letters as key.
+          <br><br>Example:  monarchybdefgiklpqstuvwxz
+          <br><br>3. Click on cipher button to encrypt the text.
+          <br><br>4. Follow the same instructions to decrypt. 
+        </p>
+       
+      </div>
+    </div>
+  
+  </div>
+  <script>
+
+    var information = document.getElementById("myinformation");
+    var instructions = document.getElementById("myinstructions");
+
+    var informtion_button = document.getElementById("information");
+    var instructions_button = document.getElementById("instructions");
+
+    
+ 
+    var span = document.getElementsByClassName("close1")[0];
+    var span1 = document.getElementsByClassName("close2")[0];
+    
+
+
+    informtion_button.onclick = function() {
+      if(information.style.display === "block")
+      {
+      information.style.display = "none";
+      }
+      else{
+        information.style.display = "block";
+      }
+    }
+    
+    instructions_button.onclick = function() {
+      if(instructions.style.display==="block")
+      {
+      instructions.style.display = "none";
+      }
+      else{
+        instructions.style.display = "block";
+      }
+   
+    }
+
+    span.onclick = function() {
+      information.style.display = "none";
+    }
+    span1.onclick = function() {
+      instructions.style.display = "none";
+    }
+ 
+    window.onclick = function(event) {
+      if (event.target == information) {
+        information.style.display = "none";
+      }
+    }
+    window.onclick = function(event) {
+      if (event.target == instructions) {
+        instructions.style.display = "none";
+      }
+    }
+    </script>
+  
+      <!-- CONTROLS TO CIPHER AND DECIPHER MESSAGES -->
+    
+
+
+       
+        <div class="inOut">
+          <textarea name="input" rows="8" cols="80" id="text" placeholder="Input"></textarea>
+          <span>
+            <button class="polyButton cipherMethod" id="cipherButtonPoly" onclick="encrypt()" >Encryption</button>
+            <button class="polyButton decipherMethod" id="decipherButton" onclick="decrypt()">Decryption</button>
+            <br><br><br><br><br><br>
+            <div class="inOut matr">
+              <input style="margin-left: 10px;" type="text" id="key" placeholder=" Enter Key">
+              
+              <div id="steps"></div>
+            </div>
+          </span>
+          <textarea name="result" rows="4" cols="100" id="output" placeholder="Output"></textarea>
+        </div>
+ 
+  <script>
+    
+      function encrypt() {
+        const key = document.getElementById("key").value;
+        let plaintext = document
+          .getElementById("text")
+          .value.toLowerCase()
+          .replace(/ /g, "");
+
+        // Step 1: Handle odd-length plaintext
+       
+       for(let i = 0; i < plaintext.length-1; i += 2){
+        if(plaintext[i] === plaintext[i + 1]){
+            plaintext = plaintext.slice(0, i+1) + 'x' + plaintext.slice(i+1);
+          }
+       }
+
+       if (plaintext.length % 2 !== 0) {
+          plaintext += "x"; // Appending 'x' to complete the digram
+          //digrams.push(plaintext)
+        }
+          
+        // Step 2: Group plaintext into digrams
+        const digrams = [];
+        console.log(digrams);
+        for (let i = 0; i < plaintext.length; i += 2) {
+        let digram = plaintext.slice(i,i+2)
+        if (digram.length === 1) {
+            // Handle case where only one character is left
+            digram += "x";
+          } else if (digram[0] === digram[1]) {
+            // Handle case where both characters are the same
+            digram = digram[0] + "x";
+          }
+          digrams.push(digram);
+        }
+
+        const keyMatrix = playfair(key);
+        let ciphertext = "";
+        let steps = "";
+        displayMatrix(keyMatrix);
+        steps += "<h3>Steps:</h3>";
+
+        for (let digram of digrams) {
+          let char1 = digram[0];
+          let char2 = digram[1];
+          let row1, col1, row2, col2;
+
+          row1 = Math.floor(keyMatrix.indexOf(char1) / 5);
+          col1 = keyMatrix.indexOf(char1) % 5;
+          row2 = Math.floor(keyMatrix.indexOf(char2) / 5);
+          col2 = keyMatrix.indexOf(char2) % 5;
+
+          steps += `Pair: ${char1}${char2}<br>`;
+          if (row1 === row2) {
+            steps += `Same row, shifting right<br>`;
+            ciphertext += keyMatrix[row1 * 5 + ((col1 + 1) % 5)];
+            ciphertext += keyMatrix[row2 * 5 + ((col2 + 1) % 5)];
+          } else if (col1 === col2) {
+            steps += `Same column, shifting down<br>`;
+            ciphertext += keyMatrix[((row1 + 1) % 5) * 5 + col1];
+            ciphertext += keyMatrix[((row2 + 1) % 5) * 5 + col2];
+          } else {
+            steps += `Forming rectangle, swapping columns<br>`;
+            ciphertext += keyMatrix[row1 * 5 + col2];
+            ciphertext += keyMatrix[row2 * 5 + col1];
+          }
+        }
+        document.getElementById("output").value = ciphertext;
+        document.getElementById("steps").innerHTML += steps;
+      }
+
+      function playfair(key) {
+        const alphabet = "abcdefghiklmnopqrstuvwxyz"; // Skipping 'j'
+        let keyMatrix = [];
+        let keyString = "";
+        key = key.toLowerCase().replace(/j/g, "i");
+        key += alphabet;
+
+        for (let i = 0; i < key.length; i++) {
+          if (!keyString.includes(key[i])) {
+            keyMatrix.push(key[i]);
+            keyString += key[i];
+          }
+        }
+        return keyMatrix;
+      }
+
+      function displayMatrix(matrix) {
+        let table = '<table border="1">';
+        for (let i = 0; i < 5; i++) {
+          table += "<tr>";
+          for (let j = 0; j < 5; j++) {
+            table += `<td>${matrix[i * 5 + j]}</td>`;
+          }
+          table += "</tr>";
+        }
+        table += "</table>";
+        document.getElementById("steps").innerHTML +=
+          "<h3>Key Matrix:</h3>" + table;
+      }
+
+      function decrypt() {
+        const key = document.getElementById("key").value;
+        let ciphertext = document.getElementById("text")
+            .value.toLowerCase()
+            .replace(/j/g, "i")
+            .replace(/ /g, "")
+        const keyMatrix = playfair(key);
+        let plaintext = "";
+        let steps = "";
+
+        displayMatrix(keyMatrix);
+        steps += "<h3>Steps:</h3>";
+
+        for (let i = 0; i < ciphertext.length; i += 2) {
+          let char1 = ciphertext[i];
+          let char2 = ciphertext[i + 1];
+          let row1, col1, row2, col2;
+
+          row1 = Math.floor(keyMatrix.indexOf(char1) / 5);
+          col1 = keyMatrix.indexOf(char1) % 5;
+          row2 = Math.floor(keyMatrix.indexOf(char2) / 5);
+          col2 = keyMatrix.indexOf(char2) % 5;
+
+          steps += `Pair: ${char1}${char2}<br>`;
+          if (row1 === row2) {
+            steps += `Same row, shifting left<br>`;
+            plaintext += keyMatrix[row1 * 5 + ((col1 + 4) % 5)];
+            plaintext += keyMatrix[row2 * 5 + ((col2 + 4) % 5)];
+          } else if (col1 === col2) {
+            steps += `Same column, shifting up<br>`;
+            plaintext += keyMatrix[((row1 + 4) % 5) * 5 + col1];
+            plaintext += keyMatrix[((row2 + 4) % 5) * 5 + col2];
+          } else {
+            steps += `Forming rectangle, swapping columns<br>`;
+            plaintext += keyMatrix[row1 * 5 + col2];
+            plaintext += keyMatrix[row2 * 5 + col1];
+          }
+        }
+        document.getElementById("output").value = plaintext;
+        document.getElementById("steps").innerHTML += steps;
+      }
+    </script>
+</body>
+</html>
